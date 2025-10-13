@@ -40,6 +40,9 @@ class GameEngine:
             self.ball.reset()
 
         self.ai.auto_track(self.ball, self.height)
+        if self.player_score >= 5 or self.ai_score >= 5:
+            self.show_game_over()
+
 
     def render(self, screen):
         # Draw paddles and ball
@@ -53,3 +56,42 @@ class GameEngine:
         ai_text = self.font.render(str(self.ai_score), True, WHITE)
         screen.blit(player_text, (self.width//4, 20))
         screen.blit(ai_text, (self.width * 3//4, 20))
+
+    def show_game_over(self):
+        winner = "Player" if self.player_score > self.ai_score else "AI"
+        screen = pygame.display.get_surface()
+        font_big = pygame.font.SysFont("Arial", 50)
+        text = font_big.render(f"{winner} Wins!", True, WHITE)
+        screen.fill((0, 0, 0))
+        screen.blit(text, (self.width//2 - text.get_width()//2, self.height//2 - 100))
+
+        small_font = pygame.font.SysFont("Arial", 30)
+        options = [
+            "Press 3 for Best of 3",
+            "Press 5 for Best of 5",
+            "Press 7 for Best of 7",
+            "Press ESC to Exit"
+        ]
+        for i, opt in enumerate(options):
+            line = small_font.render(opt, True, WHITE)
+            screen.blit(line, (self.width//2 - line.get_width()//2, self.height//2 + i*40))
+
+        pygame.display.flip()
+
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        exit()
+                    elif event.key in [pygame.K_3, pygame.K_5, pygame.K_7]:
+                        self.player_score = 0
+                        self.ai_score = 0
+                        best_of = int(event.unicode)
+                        self.win_score = (best_of // 2) + 1
+                        self.ball.reset()
+                        waiting = False
