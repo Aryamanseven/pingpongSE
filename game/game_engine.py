@@ -3,7 +3,6 @@ from .paddle import Paddle
 from .ball import Ball
 
 # Game Engine
-
 WHITE = (255, 255, 255)
 
 class GameEngine:
@@ -20,6 +19,7 @@ class GameEngine:
         self.player_score = 0
         self.ai_score = 0
         self.font = pygame.font.SysFont("Arial", 30)
+        self.win_score = 5  # default win score
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
@@ -40,9 +40,10 @@ class GameEngine:
             self.ball.reset()
 
         self.ai.auto_track(self.ball, self.height)
-        if self.player_score >= 5 or self.ai_score >= 5:
-            self.show_game_over()
 
+        # Dynamic win check based on selected best-of
+        if self.player_score >= self.win_score or self.ai_score >= self.win_score:
+            self.show_game_over()
 
     def render(self, screen):
         # Draw paddles and ball
@@ -89,9 +90,9 @@ class GameEngine:
                         pygame.quit()
                         exit()
                     elif event.key in [pygame.K_3, pygame.K_5, pygame.K_7]:
+                        best_of = int(event.unicode)
+                        self.win_score = (best_of // 2) + 1  # calculate dynamic win score
                         self.player_score = 0
                         self.ai_score = 0
-                        best_of = int(event.unicode)
-                        self.win_score = (best_of // 2) + 1
                         self.ball.reset()
                         waiting = False
